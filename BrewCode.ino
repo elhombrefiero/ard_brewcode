@@ -1,4 +1,3 @@
-
 /*
  Name:		    BrewCode.ino
  Description:	Controls a series of heaters and pumps based on
@@ -6,17 +5,19 @@
  Author:	    Rene Valdez
 */
 
-#include <OneWire.h>
-#include <DallasTemperature.h>
+#include "OneWire.h"
+#include "DallasTemperature.h"
+/*
 #include "SerialOutput.h"
 #include "SerialInput.h"
 #include "Heater.h"
 #include "TempSensorUtil.h"
+*/
 
 // Define some constants
-#define ONE_WIRE_PIN 10
-#define MAX_TEMP_SENSORS 10
-#define NUMBER_OF_HEATERS 3
+#define ONE_WIRE_PIN 10     // Data pin for the temperature sensors
+#define MAX_TEMP_SENSORS 10 // TODO: Figure out way to define temp sensors in runtime
+#define NUMBER_OF_HEATERS 3 // TODO: Figure out way to create heaters in runtime
 
 // Setup a OneWire instance to communicate with oneWire devices
 OneWire oneWire(ONE_WIRE_PIN);
@@ -57,7 +58,7 @@ void setup()
 	Serial.println();
 
 	// Put the pointers to the device addresses in the myTempSensor array
-	for (int i; i < MAX_TEMP_SENSORS; i++) 
+	for (int i = 0; i < MAX_TEMP_SENSORS; i++)
 	{
 		myTSensors[i] = myDAddresses[i];
 	}
@@ -68,8 +69,8 @@ void setup()
 	// Setup the sensors and get the number on the bus
 	sensors.begin();
 	number_of_sensors = sensors.getDeviceCount();
-	if (DEBUG) { 
-		Serial.print("Found "); 
+	if (DEBUG) {
+		Serial.print("Found ");
 		Serial.print(number_of_sensors);
 		Serial.println(" Temperature Sensors");
 	}
@@ -80,7 +81,7 @@ void setup()
 			Serial.print("Creating temperature sensor ");
 			Serial.println(i);
 		}
-		if (!sensors.getAddress(myTSensors[i], i)) 
+		if (!sensors.getAddress(myTSensors[i], i))
 		{
 			Serial.print("Failed to create temp sensor ");
 			Serial.println(i);
@@ -164,7 +165,7 @@ void loop()
 void printTempSensors() {
 	// Temp Sensor info
 	Serial.println("Printing Temp Sensor info.");
-	for (uint8_t i=0; i < number_of_sensors; i++) {
+	for (uint8_t i = 0; i < number_of_sensors; i++) {
 		Serial.print("Temp sensor ");
 		Serial.print(i);
 		Serial.print(" : ");
@@ -196,4 +197,14 @@ void switchPin(int pin_num) {
 	}
 	delay(1);
 
+}
+
+// function to print a device address
+void printAddress(DeviceAddress deviceAddress)
+{
+	for (uint8_t i = 0; i < 8; i++)
+	{
+		if (deviceAddress[i] < 16) Serial.print("0");
+		Serial.print(deviceAddress[i], HEX);
+	}
 }
