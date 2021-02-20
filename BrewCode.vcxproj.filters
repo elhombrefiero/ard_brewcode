@@ -21,31 +21,5 @@
     <ClInclude Include="__vm\.BrewCode.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Heater.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SerialOutput.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SerialInput.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TempSensorUtil.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="Heater.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SerialOutput.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SerialInput.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TempSensorUtil.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>
