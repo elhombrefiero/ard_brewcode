@@ -20,6 +20,12 @@ struct Heater {
 	int data_pin = LED_BUILTIN;
 };
 
+// TODO: Add pressure sensor structure
+
+// TODO: Add pump structure
+
+// TODO: Account for solenoid valve at some point
+
 // Define some constants
 #define ONE_WIRE_PIN 10     // Data pin for the temperature sensors
 #define MAX_TEMP_SENSORS 10 // TODO: Figure out way to define temp sensors in runtime
@@ -241,7 +247,7 @@ void print_heater_info(int i) {
 	Serial.print(myHeaters[i].setpoint_high);
 	Serial.print(";setpoint_low=");
 	Serial.print(myHeaters[i].setpoint_low);
-	Serial.print(":setpoint_max=");
+	Serial.print(";setpoint_max=");
 	Serial.print(myHeaters[i].setpoint_max);
 	Serial.print(";pin=");
 	Serial.print(myHeaters[i].data_pin);
