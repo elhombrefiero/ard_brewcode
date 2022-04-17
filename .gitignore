@@ -1,3 +1,11 @@
+# Brewcode gitignore
+# Ignore Visual Studio solution files
+*.sln
+*.vcxproj
+.vs/*
+__vm/*
+# Ignore 
+
 # Prerequisites
 *.d
 
