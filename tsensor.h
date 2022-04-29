@@ -13,10 +13,12 @@
 	#include "WProgram.h"
 #endif
 
-void init_temp_sensors(DallasTemperature &sensors, std::vector<uint8_t*> &tsensors);
+void init_temp_sensors(DallasTemperature &sensors);
 
-void print_temp_sensors(DallasTemperature& sensors, std::vector<uint8_t*> &tsensors);
+void print_temp_sensors(DallasTemperature& sensors);
 
-void dadress_to_char(DeviceAddress deviceAddress, char* return_char_array);
+void daddress_to_char(DeviceAddress deviceAddress, char* return_char_array);
+
+int find_tsensor_by_name(DallasTemperature& sensors, const char* lookup_serial);
 
 #endif

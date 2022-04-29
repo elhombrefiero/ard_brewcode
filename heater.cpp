@@ -54,14 +54,17 @@ int identify_heater_by_name(const char* check_name)
 
 void update_heater_setpoint_high(int hindex, float setpoint_high)
 {
+	heaters[hindex].set_setpoint_high(setpoint_high);
 }
 
 void update_heater_setpoint_low(int hindex, float setpoint_low)
 {
+	heaters[hindex].set_setpoint_low(setpoint_low);
 }
 
 void update_heater_setpoint_max(int hindex, float setpoint_max)
 {
+	heaters[hindex].set_setpoint_max(setpoint_max);
 }
 
 void update_heater_pin(int hindex, int pin) 
@@ -73,6 +76,11 @@ const char* Heater::get_name() {
 	return name;
 }
 
+void update_heater_index(int hindex, int new_index)
+{
+	heaters[hindex].set_index(new_index);
+}
+
 void Heater::set_index(int index)
 {
 	hindex = index;
@@ -80,11 +88,31 @@ void Heater::set_index(int index)
 
 void Heater::check_setpoints(DallasTemperature& sensors)
 {
+	int val = digitalRead(data_pin);
+	float maxtempF = 999.0; // Peg it high so it won't turn the heater on
+	float tempF; // Temperature from sensor array
+	if (!has_sensor) return;
 
-}
-
-void Heater::remove_tsensors()
-{
+	for (int i = 0; i < tsensor_indices.size(); i++) {
+		// Get the latest temperature for the heater
+		float tempF = sensors.getTempFByIndex(tsensor_indices[i]);
+		if (tempF > 32.0) { // Use case will never use freezing temperatures
+			if (val == HIGH) {
+				status = true;
+				if (tempF > setpoint_high || tempF > setpoint_max) {
+					digitalWrite(data_pin, LOW);
+					status = false;
+				}
+			}
+			if (val == LOW) {
+				status = false;
+				if (tempF < setpoint_low) {
+					digitalWrite(data_pin, HIGH);
+					status = true;
+				}
+			}
+		}
+	}	
 }
 
 float Heater::get_setpoint_high()
@@ -92,9 +120,19 @@ float Heater::get_setpoint_high()
 	return setpoint_high;
 }
 
+void Heater::set_setpoint_high(float new_setpoint_high)
+{
+	setpoint_high = new_setpoint_high;
+}
+
 float Heater::get_setpoint_low()
 {
 	return setpoint_low;
+}
+
+void Heater::set_setpoint_low(float new_setpoint_low)
+{
+	setpoint_low = new_setpoint_low;
 }
 
 float Heater::get_setpoint_max()
@@ -102,10 +140,25 @@ float Heater::get_setpoint_max()
 	return setpoint_max;
 }
 
+void Heater::set_setpoint_max(float new_setpoint_max)
+{
+	setpoint_max = new_setpoint_max;
+}
 
 int Heater::get_data_pin()
 {
 	return data_pin;
+}
+
+void Heater::set_data_pin(int new_pin)
+{
+	// Turn off previous pin and set it to INPUT
+	digitalWrite(data_pin, LOW);
+	pinMode(data_pin, INPUT);
+
+	// Set the new heater pin
+	pinMode(new_pin, OUTPUT);
+	data_pin = new_pin;
 }
 
 bool Heater::get_status()
@@ -113,13 +166,25 @@ bool Heater::get_status()
 	return status;
 }
 
+void Heater::update_heater_name(const char* new_name)
+{
+	strcpy(name, new_name);
+}
+
+void Heater::remove_tsensors()
+{
+	digitalWrite(data_pin, LOW);
+	status = false;
+	data_pin = LED_BUILTIN;
+	tsensor_indices.clear();
+	has_sensor = false;
+}
+
 float Heater::get_current_temp(DallasTemperature &sensors)
 {
 	float current_temp = 0.0;
 	for (int i = 0; i < tsensor_indices.size(); i++) {
 		float tsensor_temp = sensors.getTempFByIndex(tsensor_indices[i]);
-		Serial.print("Heater tsensor_temp: "); //DELETE
-		Serial.println(tsensor_temp); //DELETE
 		if (tsensor_temp > current_temp) {
 			current_temp = tsensor_temp;
 		}
@@ -127,10 +192,7 @@ float Heater::get_current_temp(DallasTemperature &sensors)
 	return current_temp;
 }
 
-void Heater::set_data_pin(int new_pin)
-{
-	data_pin = new_pin;
-}
+
 
 void Heater::add_tsensor(DallasTemperature& sensors, int tsensor_index)
 {
@@ -140,16 +202,40 @@ void Heater::add_tsensor(DallasTemperature& sensors, int tsensor_index)
 	valid_address = sensors.getAddress(tsensor_address, tsensor_index);
 	if (valid_address) {
 		tsensor_indices.push_back(tsensor_index);
+		has_sensor = true;
 	}
 }
 
-//void update_heater_tsensor(int hindex, DallasTemperature& sensors, std::vector<uint8_t*>& tsensors, const char* tsensor_address) 
-//{
-//	return;
-//}
-
+void update_heater_tsensor_by_tsensor_name(int hindex, DallasTemperature& sensors, const char* tsensor_address)
+{
+	Serial.println("In update_heater_tsensor by name");
+	int tsensor_index;
+	tsensor_index = find_tsensor_by_name(sensors, tsensor_address);
+	if (tsensor_index != -1) {
+		heaters[hindex].add_tsensor(sensors, tsensor_index);
+	}
+	
+	return;
+}
 
 void update_heater_tsensor(int hindex, DallasTemperature& sensors, int tsensor_index)
 {
 	heaters[hindex].add_tsensor(sensors, tsensor_index);
+}
+
+void remove_heater_tsensors(int hindex)
+{
+	heaters[hindex].remove_tsensors();
+}
+
+void check_heater_setpoints(DallasTemperature& sensors)
+{
+	for (int i = 0; i < heaters.size(); i++) {
+		heaters[i].check_setpoints(sensors);
+	}
+}
+
+void update_heater_name_by_index(int hindex, const char* new_name) 
+{
+	heaters[hindex].update_heater_name(new_name);
 }

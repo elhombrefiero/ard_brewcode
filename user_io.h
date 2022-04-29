@@ -13,17 +13,19 @@
 
 #define MAX_SERIAL_INPUT 256 // Maximum size of character array to send info through serial
 
-void return_all_info();
+void return_all_info(DallasTemperature& sensors);
 
 void clean_serial();
 
 //void process_heater_info();
 
-void determine_action(DallasTemperature& sensors, std::vector<uint8_t*>& tsensors);
+void determine_action(DallasTemperature& sensors);
 
-void process_incoming_byte(const byte inByte, DallasTemperature& sensors, std::vector<uint8_t*>& tsensors);
+void process_incoming_byte(const byte inByte, DallasTemperature& sensors);
 
-void process_heater_info(DallasTemperature& sensors, std::vector<uint8_t*>& tsensors);
+void process_heater_info(DallasTemperature& sensors);
+
+void process_user_input(DallasTemperature& sensors);
 
 
 #endif

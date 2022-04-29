@@ -9,11 +9,11 @@ char static SerialInput[MAX_SERIAL_INPUT];
 static StaticJsonDocument<256> json_input;
 static StaticJsonDocument<96> tsensor_info;
 
-void return_all_info()
+void return_all_info(DallasTemperature& sensors)
 {
 	//Print the information for sensors and controllers
-	print_temp_sensors;
-	print_heater_info;
+	print_temp_sensors(sensors);
+	print_heater_info(sensors);
 }
 
 void clean_serial()
@@ -21,9 +21,10 @@ void clean_serial()
 	for (int i = 0; i < MAX_SERIAL_INPUT - 1; i++) {
 		SerialInput[i] = '\0';
 	}
+	json_input.clear();
 }
 
-void process_heater_info(DallasTemperature &sensors, std::vector<uint8_t*> &tsensors)
+void process_heater_info(DallasTemperature &sensors)
 {
 	/*
 	For heater/pump components, one the following is required:
@@ -44,7 +45,16 @@ void process_heater_info(DallasTemperature &sensors, std::vector<uint8_t*> &tsen
 	float setpoint_low = json_input["setpoint_low"]; // 90.5
 	float setpoint_max = json_input["setpoint_max"]; // 212.5
 	int pin = json_input["pin"]; // 5
-	const char* tsensor_address = json_input["tsensor_address"]; // "12340987sdf"
+	const char* tsensor_address = json_input["tsensor_address"]; // "28FFAC378217045A"
+	int tsensor_index = json_input["tsensor_index"];
+	bool remove_tsensors = json_input["remove_tsensors"]; // "remove_tsensors"
+	bool add_heater = json_input["add_heater"];
+	
+	// Add new heater
+	if (json_input.containsKey("add_heater") {
+		add_heater();
+		return;
+	}
 
 	// Get index of heater
 	if (json_input.containsKey("name")) {
@@ -74,7 +84,7 @@ void process_heater_info(DallasTemperature &sensors, std::vector<uint8_t*> &tsen
 
 	// Update heater name if found
 	if (json_input.containsKey("new_name")) {
-		update_heater_name(hindex, new_name);
+		update_heater_name_by_index(hindex, new_name);
 	}
 
 	// Update heater pin if found
@@ -83,12 +93,27 @@ void process_heater_info(DallasTemperature &sensors, std::vector<uint8_t*> &tsen
 	}
 
 	// Update tsensor if found
-	//if (json_input.containsKey("tsensor_address")) {
-	//	update_heater_tsensor(hindex, sensors, tsensors, tsensor_address);
-	//}
+	if (json_input.containsKey("tsensor_address")) {
+		update_heater_tsensor_by_tsensor_name(hindex, sensors, tsensor_address);
+	}
+	if (json_input.containsKey("tsensor_index")) {
+		update_heater_tsensor(hindex, sensors, tsensor_index);
+	}
+
+	// Remove tsensors from heater
+	if (json_input.containsKey("remove_tsensors")) {
+		remove_heater_tsensors(hindex);
+	}
 }
 
-void determine_action(DallasTemperature& sensors, std::vector<uint8_t*>& tsensors)
+void process_user_input(DallasTemperature& sensors)
+{
+	while (Serial.available()) {
+		process_incoming_byte(Serial.read(), sensors);
+	}
+}
+
+void determine_action(DallasTemperature& sensors)
 {
 	/*
  * Deserialize the JSON information in the SERIAL_BUFFER
@@ -105,30 +130,31 @@ void determine_action(DallasTemperature& sensors, std::vector<uint8_t*>& tsensor
 		output_text["msg"] = "determine_action, deserializeJson() failed.";
 		output_text["msg2"] = error.f_str();
 		serializeJson(output_text, Serial);
+		Serial.println();
 		return;
 	}
 
 	const char* type = json_input["type"];
 
 	if (strcmp(type, "heater") == 0) {
-		process_heater_info(sensors, tsensors);
+		process_heater_info(sensors);
 		return;
 	}
 }
 
-void process_incoming_byte(const byte inByte, DallasTemperature& sensors, std::vector<uint8_t*>& tsensors)
+void process_incoming_byte(const byte inByte, DallasTemperature& sensors)
 {
 	static unsigned int input_pos = 0;
 
 	switch (inByte) {
 	case '!': // display all information
-		return_all_info();
+		return_all_info(sensors);
 		clean_serial();
 		input_pos = 0;
 		break;
 	case '}':
 		SerialInput[input_pos++] = inByte;
-		determine_action(sensors, tsensors);
+		determine_action(sensors);
 		clean_serial();
 		input_pos = 0;
 		break;

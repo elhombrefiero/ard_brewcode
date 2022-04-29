@@ -10,11 +10,12 @@
 	#include "ArduinoJson.h"
 	#include "tsensor.h"
 	#include "heater.h"
+	#include "user_io.h"
 #else
 	#include "WProgram.h"
 #endif
 
-void process_state(DallasTemperature& sensors, std::vector<uint8_t*>& tsensors);
+void process_state(DallasTemperature& sensors);
 
 
 #endif
