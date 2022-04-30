@@ -7,6 +7,7 @@
 	#include "arduino.h"
 	#include "tsensor.h"
 	#include "heater.h"
+	#include "control.h"
 #else
 	#include "WProgram.h"
 #endif
@@ -17,8 +18,6 @@ void return_all_info(DallasTemperature& sensors);
 
 void clean_serial();
 
-//void process_heater_info();
-
 void determine_action(DallasTemperature& sensors);
 
 void process_incoming_byte(const byte inByte, DallasTemperature& sensors);
@@ -26,6 +25,10 @@ void process_incoming_byte(const byte inByte, DallasTemperature& sensors);
 void process_heater_info(DallasTemperature& sensors);
 
 void process_user_input(DallasTemperature& sensors);
+
+void print_general_status();
+
+void process_general_info();
 
 
 #endif

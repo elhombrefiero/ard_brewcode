@@ -17,6 +17,10 @@
 
 void process_state(DallasTemperature& sensors);
 
+bool is_auto_control();
+
+void set_auto_control(bool new_auto_control);
+
 
 #endif
 

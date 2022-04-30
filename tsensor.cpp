@@ -12,6 +12,11 @@ void init_temp_sensors(DallasTemperature &sensors)
 	num_of_sensors = sensors.getDeviceCount();
 }
 
+int get_num_of_sensors()
+{
+	return num_of_sensors;
+}
+
 void print_temp_sensors(DallasTemperature& sensors)
 {
 	char address[16];

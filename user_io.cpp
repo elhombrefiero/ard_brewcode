@@ -7,10 +7,36 @@
 // String that will keep incoming serial info.
 char static SerialInput[MAX_SERIAL_INPUT];
 static StaticJsonDocument<256> json_input;
-static StaticJsonDocument<96> tsensor_info;
+static StaticJsonDocument<64> general_info;
+
+void print_general_status() 
+{
+	// Number of tsensors
+	int itsensors = get_num_of_sensors();
+
+	// Number of heaters
+	int iheaters = get_num_of_heaters();
+
+	// Auto vs manual control
+	bool lauto = is_auto_control();
+
+	// Random number to signify that everything is active
+	int number = random(1, 100);
+
+	general_info["type"] = "general";
+	general_info["num_of_tsensors"] = itsensors;
+	general_info["num_of_heaters"] = iheaters;
+	general_info["auto_control"] = lauto;
+	general_info["random_number"] = number;
+	serializeJson(general_info, Serial);
+
+	return;
+}
 
 void return_all_info(DallasTemperature& sensors)
 {
+	//Print general status
+	print_general_status();
 	//Print the information for sensors and controllers
 	print_temp_sensors(sensors);
 	print_heater_info(sensors);
@@ -48,10 +74,10 @@ void process_heater_info(DallasTemperature &sensors)
 	const char* tsensor_address = json_input["tsensor_address"]; // "28FFAC378217045A"
 	int tsensor_index = json_input["tsensor_index"];
 	bool remove_tsensors = json_input["remove_tsensors"]; // "remove_tsensors"
-	bool add_heater = json_input["add_heater"];
+	bool add_new_heater = json_input["add_heater"];
 	
 	// Add new heater
-	if (json_input.containsKey("add_heater") {
+	if (json_input.containsKey("add_heater")) {
 		add_heater();
 		return;
 	}
@@ -113,16 +139,9 @@ void process_user_input(DallasTemperature& sensors)
 	}
 }
 
-void determine_action(DallasTemperature& sensors)
+bool error_in_json_input()
 {
-	/*
- * Deserialize the JSON information in the SERIAL_BUFFER
- * Process JSON command(s).
- * {type:heater,name:"Heater 1",index=1,...}
-*/
-
 	DynamicJsonDocument output_text(MAX_SERIAL_INPUT);
-
 	DeserializationError error = deserializeJson(json_input, SerialInput);
 
 	if (error) {
@@ -133,12 +152,62 @@ void determine_action(DallasTemperature& sensors)
 		Serial.println();
 		return;
 	}
+}
+
+void determine_action(DallasTemperature& sensors)
+{
+	/*
+ * Deserialize the JSON information in the SERIAL_BUFFER
+ * Process JSON command(s).
+ * {type:heater,name:"Heater 1",index=1,...}
+*/
+
+	if (error_in_json_input) return;
 
 	const char* type = json_input["type"];
 
 	if (strcmp(type, "heater") == 0) {
 		process_heater_info(sensors);
 		return;
+	}
+
+	if (strcmp(type, "general") == 0) {
+		process_general_info();
+		return;
+	}
+
+	if (strcmp(type, "pin") == 0) {
+		process_pin_info;
+		return;
+	}
+}
+
+void process_general_info()
+{
+	bool auto_control = json_input["auto_control"]; // true
+
+	// User can set control to manual
+	if (json_input.containsKey("auto_control")) {
+		set_auto_control(auto_control);
+	}	
+}
+
+void process_pin_info()
+{
+	int pin_num = json_input["pin_num"]; // 1
+	bool status = json_input["status"]; // true
+	bool is_auto = is_auto_control();
+
+	if (!is_auto) return; // Only control pins when in manual mode
+
+	if (json_input.containsKey("pin_num") & json_input.containsKey("status")) {
+		if (status) {
+			pinMode(pin_num, OUTPUT); // In case the pin was not active via a controller
+			digitalWrite(pin_num, status);
+		}
+		else {
+			digitalWrite(pin_num, status);
+		}
 	}
 }
 

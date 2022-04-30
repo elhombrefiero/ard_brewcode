@@ -15,22 +15,34 @@ void add_heater()
 	num_of_heaters++;
 }
 
-void print_heater_info(DallasTemperature& sensors) {
+void Heater::print_info(DallasTemperature& sensors)
+{
 	DynamicJsonDocument hinfo(256);
-	for (int i = 0; i < heaters.size(); i++) {
-		hinfo["type"] = "heater";
-		hinfo["name"] = heaters[i].get_name();
-		hinfo["index"] = i;
-		hinfo["pin"] = heaters[i].get_data_pin();
-		hinfo["setpoint_high"] = heaters[i].get_setpoint_high();
-		hinfo["setpoint_low"] = heaters[i].get_setpoint_low();
-		hinfo["setpoint_max"] = heaters[i].get_setpoint_max();
-		hinfo["current_temp"] = heaters[i].get_current_temp(sensors);
-		hinfo["status"] = heaters[i].get_status();
-		serializeJson(hinfo, Serial);
-		Serial.println();
-		hinfo.clear();
+
+	hinfo["type"] = "heater";
+	hinfo["name"] = name;
+	hinfo["index"] = hindex;
+	hinfo["pin"] = data_pin;
+	hinfo["setpoint_high"] = setpoint_high;
+	hinfo["setpoint_low"] = setpoint_low;
+	hinfo["setpoint_max"] = setpoint_max;
+	hinfo["current_temp"] = get_current_temp(sensors);
+	hinfo["status"] = get_status();
+	JsonArray indices = hinfo.createNestedArray("tsensor_indices");
+	for (int i = 0; i < tsensor_indices.size(); i++) 
+	{
+		indices.add(tsensor_indices[i]);
 	}
+	serializeJson(hinfo, Serial);
+	Serial.println();
+	hinfo.clear();
+}
+
+void print_heater_info(DallasTemperature& sensors) {
+	for (int i = 0; i < heaters.size(); i++) {
+		heaters[i].print_info(sensors);
+	}
+	
 }
 
 int identify_heater_by_name(const char* check_name)
@@ -238,4 +250,9 @@ void check_heater_setpoints(DallasTemperature& sensors)
 void update_heater_name_by_index(int hindex, const char* new_name) 
 {
 	heaters[hindex].update_heater_name(new_name);
+}
+
+int get_num_of_heaters()
+{
+	return num_of_heaters;
 }

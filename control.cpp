@@ -28,3 +28,14 @@ void process_state(DallasTemperature &sensors) {
 		}
 	}
 }
+
+bool is_auto_control()
+{
+	return auto_control;
+}
+
+void set_auto_control(bool new_auto_control) {
+	// TODO: When going from auto to manual control, disable all controllers
+	// Similarly, when going from manual to auto, enable all controllers
+	auto_control = new_auto_control;
+}

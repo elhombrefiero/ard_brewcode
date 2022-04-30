@@ -21,4 +21,6 @@ void daddress_to_char(DeviceAddress deviceAddress, char* return_char_array);
 
 int find_tsensor_by_name(DallasTemperature& sensors, const char* lookup_serial);
 
+int get_num_of_sensors();
+
 #endif

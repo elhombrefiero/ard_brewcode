@@ -41,6 +41,7 @@ public:
 		void remove_tsensors();
 		void update_heater_name(const char* new_name);
 		void add_tsensor(DallasTemperature& sensors, int tsensor_index);
+		void print_info(DallasTemperature& sensors);
 };
 
 
@@ -70,6 +71,8 @@ void update_heater_tsensor(int hindex, DallasTemperature& sensors, int tsensor_i
 void remove_heater_tsensors(int hindex);
 
 void check_heater_setpoints(DallasTemperature& sensors);
+
+int get_num_of_heaters();
 
 #endif
 
