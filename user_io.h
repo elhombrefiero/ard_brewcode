@@ -17,7 +17,7 @@ void return_all_info(DallasTemperature& sensors);
 
 void clean_serial();
 
-//void process_heater_info();
+void process_heater_info(DallasTemperature& sensors);
 
 void determine_action(DallasTemperature& sensors);
 

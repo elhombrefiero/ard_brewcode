@@ -14,7 +14,7 @@
 #endif
 
 class Heater {
-	std::vector<int> tsensor_indices;
+	
 	char name[50] = "Heater";
 	int hindex;
 	float setpoint_high = 32.0;
@@ -25,6 +25,7 @@ class Heater {
 	int data_pin = LED_BUILTIN;
 
 public:
+		std::vector<int> tsensor_indices;
 		const char* get_name();
 		void set_index(int heater_index);
 		void check_setpoints(DallasTemperature& sensors);

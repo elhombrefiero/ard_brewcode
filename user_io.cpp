@@ -48,10 +48,9 @@ void process_heater_info(DallasTemperature &sensors)
 	const char* tsensor_address = json_input["tsensor_address"]; // "28FFAC378217045A"
 	int tsensor_index = json_input["tsensor_index"];
 	bool remove_tsensors = json_input["remove_tsensors"]; // "remove_tsensors"
-	bool add_heater = json_input["add_heater"];
 	
 	// Add new heater
-	if (json_input.containsKey("add_heater") {
+	if (json_input.containsKey("add_heater")) {
 		add_heater();
 		return;
 	}
@@ -131,6 +130,7 @@ void determine_action(DallasTemperature& sensors)
 		output_text["msg2"] = error.f_str();
 		serializeJson(output_text, Serial);
 		Serial.println();
+		clean_serial();
 		return;
 	}
 
